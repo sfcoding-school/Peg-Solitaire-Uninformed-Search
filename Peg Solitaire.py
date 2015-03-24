@@ -78,14 +78,12 @@ def print_sol(fringe):
         print
 # Metodo che risolve il problema tramite ricerca in profondità
 # Uno stato è dato da una matrice, le frange sono liste di matrici,
-# infine la coda LIFO è una lista di frange. In un vettore mi salvo gli stati
-# già visitati, così da non entrare in cicli che non farebbero terminare
-# l'algoritmo. Ad ogni passo estendo la frangia applicando una per una
-# le quattro possibili mosse. Se non trovo la soluzione e la coda è vuota,
-# allora il problema non ha soluzione.
+# infine la coda LIFO è una lista di frange. Ad ogni passo estendo
+# la frangia applicando una per una le quattro possibili mosse.
+# Se non trovo la soluzione e la coda è vuota, allora il problema
+# non ha soluzione.
 def solve_dfs(start):
     queue=[[start]]
-    visited=[]
     c_gen=1
     c_vis=0
     c_depth=0
@@ -102,7 +100,6 @@ def solve_dfs(start):
             head=fringe[0]
             c_vis+=1
             c_depth=max(c_depth,len(fringe))
-            visited=visited+head
             if goal_state(head):
                 print "Depth First Search - Solution: "
                 print_sol(fringe[::-1])
@@ -115,26 +112,25 @@ def solve_dfs(start):
                     for j in range(0,len(head[0])):
                         if head[i][j]==1:
                             temp=move_right(deepcopy(head),i,j)
-                            if temp!=False and temp not in visited:
+                            if temp!=False:
                                 queue=[[temp]+fringe]+queue
                                 c_gen+=1
                             temp=move_left(deepcopy(head),i,j)
-                            if temp!=False and temp not in visited:
+                            if temp!=False:
                                 queue=[[temp]+fringe]+queue
                                 c_gen+=1
                             temp=move_down(deepcopy(head),i,j)
-                            if temp!=False and temp not in visited:
+                            if temp!=False:
                                 queue=[[temp]+fringe]+queue
                                 c_gen+=1
                             temp=move_up(deepcopy(head),i,j)
-                            if temp!=False and temp not in visited:
+                            if temp!=False:
                                 queue=[[temp]+fringe]+queue
                                 c_gen+=1
 # Metodo che usa la visita in ampiezza. Vale quanto detto per
 # quella in profondità, ma la coda ha una politica FIFO.
 def solve_bfs(start):
     queue=[[start]]
-    visited=[]
     c_gen=1
     c_vis=0
     c_depth=0
@@ -151,7 +147,6 @@ def solve_bfs(start):
             head=fringe[0]
             c_vis+=1
             c_depth=max(c_depth,len(fringe))
-            visited=visited+head
             if goal_state(head):
                 print "Breadth First Search - Solution: "
                 print_sol(fringe[::-1])
@@ -187,7 +182,6 @@ def solve_id(start):
     while True:
         iteration+=1
         queue=[[start]]
-        visited=[]
         c_gen=1
         c_vis=0
         c_depth=0
@@ -198,7 +192,6 @@ def solve_id(start):
             head=fringe[0]
             c_vis+=1
             c_depth=max(c_depth,len(fringe))
-            visited=visited+head
             if goal_state(head):
                 print "Iterative Deepening - Solution: "
                 print_sol(fringe[::-1])
@@ -211,28 +204,28 @@ def solve_id(start):
                     for j in range(0,len(head[0])):
                         if head[i][j]==1:
                             temp=move_right(deepcopy(head),i,j)
-                            if temp!=False and temp not in visited:
+                            if temp!=False:
                                 if len(fringe)<iteration:
                                     queue=[[temp]+fringe]+queue
                                     c_gen+=1
                                 else:
                                     go_on=True
                             temp=move_left(deepcopy(head),i,j)
-                            if temp!=False and temp not in visited and len(fringe)<iteration:
+                            if temp!=False and len(fringe)<iteration:
                                 if len(fringe)<iteration:
                                     queue=[[temp]+fringe]+queue
                                     c_gen+=1
                                 else:
                                     go_on=True
                             temp=move_down(deepcopy(head),i,j)
-                            if temp!=False and temp not in visited and len(fringe)<iteration:
+                            if temp!=False and len(fringe)<iteration:
                                 if len(fringe)<iteration:
                                     queue=[[temp]+fringe]+queue
                                     c_gen+=1
                                 else:
                                     go_on=True
                             temp=move_up(deepcopy(head),i,j)
-                            if temp!=False and temp not in visited and len(fringe)<iteration:
+                            if temp!=False and len(fringe)<iteration:
                                 if len(fringe)<iteration:
                                     queue=[[temp]+fringe]+queue
                                     c_gen+=1
@@ -249,7 +242,6 @@ def solve_id(start):
 # ordinate in base ad esso.
 def solve_ucs(start,costs):
     queue=[([start],0)]
-    visited=[]
     c_gen=1
     c_vis=0
     c_depth=0
@@ -266,7 +258,6 @@ def solve_ucs(start,costs):
             head=fringe[0][0]
             c_vis+=1
             c_depth=max(c_depth,len(fringe[0]))
-            visited=visited+head
             if goal_state(head):
                 print "Uniform Cost Search - Solution: "
                 print_sol(fringe[0][::-1])
@@ -280,19 +271,19 @@ def solve_ucs(start,costs):
                     for j in range(0,len(head[0])):
                         if head[i][j]==1:
                             temp=move_right(deepcopy(head),i,j)
-                            if temp!=False and temp not in visited:
+                            if temp!=False:
                                 queue=[([temp]+fringe[0],costs[0]+fringe[1])]+queue
                                 c_gen+=1
                             temp=move_left(deepcopy(head),i,j)
-                            if temp!=False and temp not in visited:
+                            if temp!=False:
                                 queue=[([temp]+fringe[0],costs[1]+fringe[1])]+queue
                                 c_gen+=1
                             temp=move_down(deepcopy(head),i,j)
-                            if temp!=False and temp not in visited:
+                            if temp!=False:
                                 queue=[([temp]+fringe[0],costs[2]+fringe[1])]+queue
                                 c_gen+=1
                             temp=move_up(deepcopy(head),i,j)
-                            if temp!=False and temp not in visited:
+                            if temp!=False:
                                 queue=[([temp]+fringe[0],costs[3]+fringe[1])]+queue
                                 c_gen+=1
             sort(queue)
