@@ -52,15 +52,25 @@ def move_right(state,x,y):
         return state
     else:
         return False
-# Funzione di ordinamento rispetto ai costi per la UCS
-def sort(queue):
-    for i in range(0,len(queue)-1):
-        for j in range(0,len(queue)-i-1):
-            if queue[j][1]>queue[j+1][1]:
-                temp=queue[j]
-                queue[j]=queue[j+1]
-                queue[j+1]=temp
-# Funzione che stampa la soluzione passo a passo
+# Funzione di ordinamento rispetto ai costi
+def partition(queue,low,high):
+    pivot=queue[high]
+    s=low
+    for j in range(low,high):
+        if queue[j][1]<pivot[1]:
+            temp=queue[j]
+            queue[j]=queue[s]
+            queue[s]=temp
+            s+=1
+    queue[high]=queue[s]
+    queue[s]=pivot
+    return s
+def quicksort(queue,low,high):
+    if low<high:
+        s=partition(queue,low,high)
+        quicksort(queue,low,s-1)
+        quicksort(queue,s+1,high)
+# Funzione che stampa una soluzione
 def print_sol(fringe):
     print
     for i in fringe:
@@ -127,8 +137,8 @@ def solve_dfs(start):
                             if temp!=False:
                                 queue=[[temp]+fringe]+queue
                                 c_gen+=1
-# Metodo che usa la visita in ampiezza. Vale quanto detto per
-# quella in profondità, ma la coda ha una politica FIFO.
+# Metodo che usa la ricerca in ampiezza. Vale quanto detto per la
+# ricerca in profondità, ma la coda è gestica con una politica FIFO.
 def solve_bfs(start):
     queue=[[start]]
     c_gen=1
@@ -174,10 +184,10 @@ def solve_bfs(start):
                             if temp!=False:
                                 queue=queue+[[temp]+fringe]
                                 c_gen+=1
-# Metodo di ricerca in profondità iterata. Per ogni iterazione
-# controllo se ha senso andare più in profondità con la
-# prossima oppure se effettivamente non c'è soluzione.
-def solve_id(start):
+# Metodo di ricerca in profondità iterata. Per ogni iterazione controllo
+# se ha senso andare più in profondità con la prossima oppure se
+# effettivamente non c'è soluzione.
+def solve_ids(start):
     iteration=0
     while True:
         iteration+=1
@@ -237,9 +247,8 @@ def solve_id(start):
             print "Iterative Deepening - Visited Nodes: "+str(c_vis)
             print "Iterative Deepening - Max reached depth: "+str(c_depth)
             return []
-# Metodo di ricerca con costi uniformi. Ogni frangia è messa
-# in una coppia con il suo costo, in modo che esse possano essere
-# ordinate in base ad esso.
+# Metodo di ricerca con costi uniformi. Ogni frangia è messa in una coppia
+# con il suo costo, in modo che esse possano essere ordinate in base ad esso.
 def solve_ucs(start,costs):
     queue=[([start],0)]
     c_gen=1
@@ -286,7 +295,7 @@ def solve_ucs(start,costs):
                             if temp!=False:
                                 queue=[([temp]+fringe[0],costs[3]+fringe[1])]+queue
                                 c_gen+=1
-            sort(queue)
+            quicksort(queue,0,len(queue)-1)
 # Creo i problemi e li provo. I primi due problemi terminano
 # in breve tempo, il terzo richiede invece più passi, infine
 # l'ultimo non ha soluzione.
@@ -322,7 +331,7 @@ solve_bfs(game_l)
 print
 print "##########################################################################"
 print
-solve_id(game_ns)
+solve_ids(game_ns)
 print
 print "##########################################################################"
 print

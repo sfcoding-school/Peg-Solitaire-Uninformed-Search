@@ -58,13 +58,23 @@ def successors(head,x,y):
 def expand(extension,fringe):
     return [extension]+fringe
 # Funzione di ordinamento rispetto ai costi
-def sort(queue):
-    for i in range(0,len(queue)-1):
-        for j in range(0,len(queue)-i-1):
-            if queue[j][1]>queue[j+1][1]:
-                temp=queue[j]
-                queue[j]=queue[j+1]
-                queue[j+1]=temp
+def partition(queue,low,high):
+    pivot=queue[high]
+    s=low
+    for j in range(low,high):
+        if queue[j][1]<pivot[1]:
+            temp=queue[j]
+            queue[j]=queue[s]
+            queue[s]=temp
+            s+=1
+    queue[high]=queue[s]
+    queue[s]=pivot
+    return s
+def quicksort(queue,low,high):
+    if low<high:
+        s=partition(queue,low,high)
+        quicksort(queue,low,s-1)
+        quicksort(queue,s+1,high)
 # Funzione che stampa una soluzione
 def print_sol(fringe):
     print
@@ -117,8 +127,7 @@ def solve_dfs(start):
                         if head[i][j]==1:
                             extensions=map(lambda x: expand(x,fringe),filter(lambda x: x!=[],successors(head,i,j)))
                             queue=extensions+queue
-                            c_gen+=len(extensions)
-                            
+                            c_gen+=len(extensions)                      
 # Metodo che usa la ricerca in ampiezza. Vale quanto detto per la
 # ricerca in profondità, ma la coda è gestica con una politica FIFO.
 def solve_bfs(start):
@@ -230,7 +239,7 @@ def solve_ucs(start,costs):
                             extensions=map(lambda x: (expand(x,fringe[0]),costs[every.index(x)]+fringe[1]),filter(lambda x: x!=[],every))
                             queue=extensions+queue
                             c_gen+=len(extensions)
-            sort(queue)
+            quicksort(queue,0,len(queue)-1)
 # Creo i problemi e li provo. I primi due problemi terminano
 # in breve tempo, il terzo richiede invece più passi, infine
 # l'ultimo non ha soluzione.
