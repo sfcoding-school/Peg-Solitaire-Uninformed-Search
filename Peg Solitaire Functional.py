@@ -17,42 +17,47 @@ def goal_state(state):
         return True
     else:
         return False
-# Quattro funzioni che definiscono le possibili mosse.
-# Controllo prima di non sforare la scacchiera, poi
-# se la mossa è corretta (e quindi mangio un pezzo).
-def move_down(state,x,y):
+# Funzione che dato uno stato ricava una lista dei possibili stati successori
+# successori applicando le quattro mosse, qualora sia possibile
+def successors(head,x,y):
+    extensions=[]
+    state=deepcopy(head)
     if x+2<len(state) and state[x+1][y]==1 and state[x+2][y]==0:
         state[x][y]=0
         state[x+1][y]=0
         state[x+2][y]=1
-        return state
+        extensions.append(state)
     else:
-        return False
-def move_up(state,x,y):
+        extensions.append([])
+    state=deepcopy(head)
     if x-2>=0 and state[x-1][y]==1 and state[x-2][y]==0:
         state[x][y]=0
         state[x-1][y]=0
         state[x-2][y]=1
-        return state
+        extensions.append(state)
     else:
-        return False
-def move_left(state,x,y):
+        extensions.append([])
+    state=deepcopy(head)
     if y-2>=0 and state[x][y-1]==1 and state[x][y-2]==0:
         state[x][y]=0
         state[x][y-1]=0
         state[x][y-2]=1
-        return state
+        extensions.append(state)
     else:
-        return False
-def move_right(state,x,y):
+        extensions.append([])
+    state=deepcopy(head)
     if y+2<len(state[0]) and state[x][y+1]==1 and state[x][y+2]==0:
         state[x][y]=0
         state[x][y+1]=0
         state[x][y+2]=1
-        return state
+        extensions.append(state)
     else:
-        return False
-# Funzione di ordinamento rispetto ai costi per la UCS
+        extensions.append([])
+    return extensions
+# Funzione che espande una frangia con un nuovo stato
+def expand(extension,fringe):
+    return [extension]+fringe
+# Funzione di ordinamento rispetto ai costi
 def sort(queue):
     for i in range(0,len(queue)-1):
         for j in range(0,len(queue)-i-1):
@@ -60,7 +65,7 @@ def sort(queue):
                 temp=queue[j]
                 queue[j]=queue[j+1]
                 queue[j+1]=temp
-# Funzione che stampa la soluzione passo a passo
+# Funzione che stampa una soluzione
 def print_sol(fringe):
     print
     for i in fringe:
@@ -79,9 +84,8 @@ def print_sol(fringe):
 # Metodo che risolve il problema tramite ricerca in profondità
 # Uno stato è dato da una matrice, le frange sono liste di matrici,
 # infine la coda LIFO è una lista di frange. Ad ogni passo estendo
-# la frangia applicando una per una le quattro possibili mosse.
-# Se non trovo la soluzione e la coda è vuota, allora il problema
-# non ha soluzione.
+# la frangia con i nuovi possibili stati successori. Se non trovo
+# la soluzione e la coda è vuota, allora il problema non ha soluzione.
 def solve_dfs(start):
     queue=[[start]]
     c_gen=1
@@ -111,24 +115,12 @@ def solve_dfs(start):
                 for i in range(0,len(head)):
                     for j in range(0,len(head[0])):
                         if head[i][j]==1:
-                            temp=move_right(deepcopy(head),i,j)
-                            if temp!=False:
-                                queue=[[temp]+fringe]+queue
-                                c_gen+=1
-                            temp=move_left(deepcopy(head),i,j)
-                            if temp!=False:
-                                queue=[[temp]+fringe]+queue
-                                c_gen+=1
-                            temp=move_down(deepcopy(head),i,j)
-                            if temp!=False:
-                                queue=[[temp]+fringe]+queue
-                                c_gen+=1
-                            temp=move_up(deepcopy(head),i,j)
-                            if temp!=False:
-                                queue=[[temp]+fringe]+queue
-                                c_gen+=1
-# Metodo che usa la visita in ampiezza. Vale quanto detto per
-# quella in profondità, ma la coda ha una politica FIFO.
+                            extensions=map(lambda x: expand(x,fringe),filter(lambda x: x!=[],successors(head,i,j)))
+                            queue=extensions+queue
+                            c_gen+=len(extensions)
+                            
+# Metodo che usa la ricerca in ampiezza. Vale quanto detto per la
+# ricerca in profondità, ma la coda è gestica con una politica FIFO.
 def solve_bfs(start):
     queue=[[start]]
     c_gen=1
@@ -158,26 +150,13 @@ def solve_bfs(start):
                 for i in range(0,len(head)):
                     for j in range(0,len(head[0])):
                         if head[i][j]==1:
-                            temp=move_right(deepcopy(head),i,j)
-                            if temp!=False:
-                                queue=queue+[[temp]+fringe]
-                                c_gen+=1
-                            temp=move_left(deepcopy(head),i,j)
-                            if temp!=False:
-                                queue=queue+[[temp]+fringe]
-                                c_gen+=1
-                            temp=move_down(deepcopy(head),i,j)
-                            if temp!=False:
-                                queue=queue+[[temp]+fringe]
-                                c_gen+=1
-                            temp=move_up(deepcopy(head),i,j)
-                            if temp!=False:
-                                queue=queue+[[temp]+fringe]
-                                c_gen+=1
-# Metodo di ricerca in profondità iterata. Per ogni iterazione
-# controllo se ha senso andare più in profondità con la
-# prossima oppure se effettivamente non c'è soluzione.
-def solve_id(start):
+                            extensions=map(lambda x: expand(x,fringe),filter(lambda x: x!=[],successors(head,i,j)))
+                            queue=queue+extensions
+                            c_gen+=len(extensions)
+# Metodo di ricerca in profondità iterata. Per ogni iterazione controllo
+# se ha senso andare più in profondità con la prossima oppure se
+# effettivamente non c'è soluzione.
+def solve_ids(start):
     iteration=0
     while True:
         iteration+=1
@@ -203,43 +182,20 @@ def solve_id(start):
                 for i in range(0,len(head)):
                     for j in range(0,len(head[0])):
                         if head[i][j]==1:
-                            temp=move_right(deepcopy(head),i,j)
-                            if temp!=False:
-                                if len(fringe)<iteration:
-                                    queue=[[temp]+fringe]+queue
-                                    c_gen+=1
-                                else:
-                                    go_on=True
-                            temp=move_left(deepcopy(head),i,j)
-                            if temp!=False and len(fringe)<iteration:
-                                if len(fringe)<iteration:
-                                    queue=[[temp]+fringe]+queue
-                                    c_gen+=1
-                                else:
-                                    go_on=True
-                            temp=move_down(deepcopy(head),i,j)
-                            if temp!=False and len(fringe)<iteration:
-                                if len(fringe)<iteration:
-                                    queue=[[temp]+fringe]+queue
-                                    c_gen+=1
-                                else:
-                                    go_on=True
-                            temp=move_up(deepcopy(head),i,j)
-                            if temp!=False and len(fringe)<iteration:
-                                if len(fringe)<iteration:
-                                    queue=[[temp]+fringe]+queue
-                                    c_gen+=1
-                                else:
-                                    go_on=True
+                            extensions=map(lambda x: expand(x,fringe),filter(lambda x: x!=[],successors(head,i,j)))
+                            if len(fringe)<iteration:
+                                queue=extensions+queue
+                                c_gen+=len(extensions)
+                            elif len(extensions)>0:
+                                go_on=True
         if not go_on:
             print "Iterative Deepening - Solution: There's no solution"
             print "Iterative Deepening - Generated Nodes: "+str(c_gen)
             print "Iterative Deepening - Visited Nodes: "+str(c_vis)
             print "Iterative Deepening - Max reached depth: "+str(c_depth)
             return []
-# Metodo di ricerca con costi uniformi. Ogni frangia è messa
-# in una coppia con il suo costo, in modo che esse possano essere
-# ordinate in base ad esso.
+# Metodo di ricerca con costi uniformi. Ogni frangia è messa in una coppia
+# con il suo costo, in modo che esse possano essere ordinate in base ad esso.
 def solve_ucs(start,costs):
     queue=[([start],0)]
     c_gen=1
@@ -270,22 +226,10 @@ def solve_ucs(start,costs):
                 for i in range(0,len(head)):
                     for j in range(0,len(head[0])):
                         if head[i][j]==1:
-                            temp=move_down(deepcopy(head),i,j)
-                            if temp!=False:
-                                queue=[([temp]+fringe[0],costs[0]+fringe[1])]+queue
-                                c_gen+=1
-                            temp=move_up(deepcopy(head),i,j)
-                            if temp!=False:
-                                queue=[([temp]+fringe[0],costs[1]+fringe[1])]+queue
-                                c_gen+=1
-                            temp=move_left(deepcopy(head),i,j)
-                            if temp!=False:
-                                queue=[([temp]+fringe[0],costs[2]+fringe[1])]+queue
-                                c_gen+=1
-                            temp=move_right(deepcopy(head),i,j)
-                            if temp!=False:
-                                queue=[([temp]+fringe[0],costs[3]+fringe[1])]+queue
-                                c_gen+=1
+                            every=successors(head,i,j)
+                            extensions=map(lambda x: (expand(x,fringe[0]),costs[every.index(x)]+fringe[1]),filter(lambda x: x!=[],every))
+                            queue=extensions+queue
+                            c_gen+=len(extensions)
             sort(queue)
 # Creo i problemi e li provo. I primi due problemi terminano
 # in breve tempo, il terzo richiede invece più passi, infine
@@ -322,7 +266,7 @@ solve_bfs(game_l)
 print
 print "##########################################################################"
 print
-solve_id(game_ns)
+solve_ids(game_ns)
 print
 print "##########################################################################"
 print
