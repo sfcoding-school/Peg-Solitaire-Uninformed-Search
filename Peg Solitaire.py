@@ -89,6 +89,24 @@ class State:
                     if temp is not None:
                         succ.append(temp)
         return succ
+    def get_data(self):
+        return self.configuration
+    def print_sol(self):
+        if self.parent is not None:
+            self.parent.print_sol()
+        print
+        for i in range(0,self.columns+2):
+                print "-",
+        print
+        for i in self.configuration:
+            print "|",
+            for j in i:
+                print str(j),
+            print "|"
+        for i in range(0,self.columns+2):
+            print "-",
+        print
+        print
 
 # Creo i problemi e li provo. I primi due problemi terminano
 # in breve tempo, il terzo richiede invece più passi, infine
