@@ -58,7 +58,7 @@ def solve_dfs(start):
                 c_gen+=len(extensions)
 
 # Metodo che usa la ricerca in ampiezza. Vale quanto detto per la
-# ricerca in profondità, ma la coda è gestica con una politica FIFO.
+# ricerca in profondità, ma la coda è gestita con una politica FIFO.
 def solve_bfs(start):
     queue=[start]
     visited=[]
